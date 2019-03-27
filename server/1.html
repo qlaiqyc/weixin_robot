@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO Chat Example</title>
+</head>
+<body>
+<button id="getAllUser">获取所有用户</button>
+<button id="sendMsg">发消息</button>
+<button id="sendFriends">发朋友圈</button>
+
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.js"></script>
+<script >
+    const $button = $("#getAllUser"),$sendMsg = $("#sendMsg"),$sendFriends = $("#sendFriends");
+    const socket = io('http://47.97.226.48:9000');
+    const defParam = {roomID:"wxid_e51sxv2f8j7822",client:"web"};
+
+    const baseRequest = (tag,key,data)=>{
+        socket.emit(tag, {
+            key:key,
+            room:defParam,
+            data:data
+        });
+    };
+
+    const request = (key,data)=>{
+        baseRequest('message',key,data)
+    };
+    const memory = {
+        join:"join",
+        getAllUser:"getAllUser",
+        sendMsg:"sendMsg",
+        sendFriends:"sendFriends",
+    }
+
+    socket.on('connect', ()=> {
+        console.log("connect","=============")
+
+        request("join","")
+        socket.on("message", result=>{
+            const { key, room,data } = result;
+            const defFun = {
+
+                getAllUser(){
+                    console.log(data)
+                },
+                sendMsg(){
+                    console.log(data)
+                },
+                sendFriends(){
+                    console.log(data)
+                },
+            }
+            if(key in defFun) defFun[key]();
+
+        });
+
+
+
+        $button.on("click",()=>{
+          request(memory.getAllUser,"");
+        });
+        $sendMsg.on("click",()=>{
+            request(memory.sendMsg,{wxid:"wxid_9gp3vu42o7jh21",text:'你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊你好啊'});
+        })
+        $sendFriends.on("click",()=>{
+            const data ={pic:"https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1552301576925&di=17f8baa010ca7811ce29b158339f6cd0&imgtype=0&src=http%3A%2F%2Fh.hiphotos.baidu.com%2Fimage%2Fpic%2Fitem%2F730e0cf3d7ca7bcb051bd704b0096b63f624a8bc.jpg",
+                text:"我是外部发送的"};
+            request(memory.sendFriends,data);
+        })
+    });
+
+
+
+
+
+
+</script>
+</body>
+</html>
